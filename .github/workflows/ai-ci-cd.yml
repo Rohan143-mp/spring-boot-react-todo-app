@@ -26,7 +26,7 @@ jobs:
         run: npm run lint --if-present
 
       - name: Run Tests
-        run: npm test --if-present
+        run: npm test --if-present -- --watchAll=false
 
       - name: Build
         run: npm run build
