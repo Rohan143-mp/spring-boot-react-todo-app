@@ -35,14 +35,25 @@ jobs:
           cache: 'maven'
           cache-dependency-path: 'backend/pom.xml'
 
-      - name: Install Dependencies & Compile
-        run: mvn -B compile
+      - name: Make Maven wrapper executable
+        run: |
+          if [ -f mvnw ]; then chmod +x mvnw; fi
 
-      - name: Run Unit & Integration Tests
-        run: mvn -B test
+      - name: Compile and Test
+        run: |
+          if [ -f mvnw ]; then
+            ./mvnw -B clean test
+          else
+            mvn -B clean test
+          fi
 
-      - name: Build Application Package
-        run: mvn -B package -DskipTests
+      - name: Build Package Artifact
+        run: |
+          if [ -f mvnw ]; then
+            ./mvnw -B package -DskipTests
+          else
+            mvn -B package -DskipTests
+          fi
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
