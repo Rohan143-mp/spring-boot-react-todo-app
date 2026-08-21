@@ -1,27 +1,14 @@
-name: Java Spring Boot CI/CD Pipeline
+name: Java Spring Boot CI
 
 on:
   push:
-    branches:
-      - main
-      - master
-      - develop
+    branches: [main, master, develop]
   pull_request:
-    branches:
-      - main
-      - master
-
-permissions:
-  contents: read
+    branches: [main, master]
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  build:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
 
     steps:
       - name: Checkout repository
@@ -33,31 +20,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          cache-dependency-path: 'backend/pom.xml'
+          cache-dependency-path: backend/pom.xml
 
-      - name: Make Maven wrapper executable
-        run: |
-          if [ -f mvnw ]; then chmod +x mvnw; fi
+      - name: Run Tests and Build Package
+        run: mvn clean verify --file backend/pom.xml
 
-      - name: Compile and Test
-        run: |
-          if [ -f mvnw ]; then
-            ./mvnw -B clean test
-          else
-            mvn -B clean test
-          fi
-
-      - name: Build Package Artifact
-        run: |
-          if [ -f mvnw ]; then
-            ./mvnw -B package -DskipTests
-          else
-            mvn -B package -DskipTests
-          fi
-
-      - name: Upload Build Artifact
+      - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: spring-boot-artifact
+          name: todo-backend-jar
           path: backend/target/*.jar
-          retention-days: 7
+          if-no-files-found: error
