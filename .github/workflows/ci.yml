@@ -5,10 +5,13 @@ on:
     branches:
       - main
       - master
+      - main-secondary
   pull_request:
     branches:
       - main
       - master
+      - main-secondary
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,6 +45,16 @@ jobs:
       - name: Build and Test Backend
         run: mvn clean verify
 
+      - name: Package Backend
+        run: mvn package -DskipTests
+
+      - name: Upload Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 7
+
   frontend-ci:
     name: Frontend Build & Test (Node.js)
     runs-on: ubuntu-latest
@@ -58,10 +71,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Frontend
         run: npm run build
@@ -85,12 +98,12 @@ jobs:
   deploy:
     name: Deployment
     needs: [backend-ci, frontend-ci, security-scan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TARGET_BRANCH: ${{ github.ref_name }}
     steps:
       - name: Deploy application
-        env:
-          DEPLOY_TARGET: "production"
         run: |
-          echo "Deploying application to $DEPLOY_TARGET environment"
+          echo "Deploying application to target environment: $TARGET_BRANCH"
