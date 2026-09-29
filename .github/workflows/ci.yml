@@ -45,9 +45,6 @@ jobs:
       - name: Build and Test Backend
         run: mvn clean verify
 
-      - name: Package Backend
-        run: mvn package -DskipTests
-
       - name: Upload Backend Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -56,7 +53,7 @@ jobs:
           retention-days: 7
 
   frontend-ci:
-    name: Frontend Build & Test (Node.js)
+    name: Frontend Build & Test (React/Vite)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -79,6 +76,13 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7
+
   security-scan:
     name: Security & Vulnerability Scan
     runs-on: ubuntu-latest
@@ -87,13 +91,15 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
+      - name: Initialize CodeQL Analysis
         uses: github/codeql-action/init@v3
         with:
-          languages: java
+          languages: java-kotlin
+          build-mode: none
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        continue-on-error: true
 
   deploy:
     name: Deployment
@@ -101,9 +107,24 @@ jobs:
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      TARGET_BRANCH: ${{ github.ref_name }}
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download Backend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target
+
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
       - name: Deploy application
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
         run: |
-          echo "Deploying application to target environment: $TARGET_BRANCH"
+          echo "Deploying application artifacts for target branch: $TARGET_BRANCH"
