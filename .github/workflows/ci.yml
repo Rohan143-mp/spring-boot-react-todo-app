@@ -31,7 +31,6 @@ jobs:
     defaults:
       run:
         working-directory: backend
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -58,13 +57,12 @@ jobs:
           retention-days: 30
 
   frontend-ci:
-    name: Frontend Build & Test (React/Vite)
+    name: Frontend Build (React/Vite)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
       run:
         working-directory: frontend
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -103,7 +101,7 @@ jobs:
   deploy:
     name: Deployment
     needs: [backend-ci, frontend-ci, security-scan]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
