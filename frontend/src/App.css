@@ -11,7 +11,7 @@
 h1 {
   margin: 0;
   font-size: 28px;
-  color: #1a1a2e;
+  color: #163b3a;
 }
 
 .subtitle {
@@ -36,7 +36,7 @@ h1 {
 
 .add-form button {
   padding: 10px 18px;
-  background: #4f46e5;
+  background: #0f766e;
   color: white;
   border: none;
   border-radius: 8px;
@@ -45,7 +45,7 @@ h1 {
 }
 
 .add-form button:hover {
-  background: #4338ca;
+  background: #115e59;
 }
 
 .todo-filters {
@@ -65,9 +65,9 @@ h1 {
 }
 
 .todo-filters button.selected {
-  border-color: #4f46e5;
-  background: #eef2ff;
-  color: #3730a3;
+  border-color: #0f766e;
+  background: #ccfbf1;
+  color: #115e59;
 }
 
 .todo-list {
