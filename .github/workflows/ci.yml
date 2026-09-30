@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   backend-ci:
-    name: Backend Build & Test (Maven)
+    name: Backend Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -45,15 +45,16 @@ jobs:
       - name: Build and Test Backend
         run: mvn clean verify
 
-      - name: Upload Backend Artifact
+      - name: Upload Application JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backend-jar
-          path: backend/target/*.jar
-          retention-days: 7
+          name: application-jar
+          path: "**/target/*.jar"
+          if-no-files-found: warn
+          retention-days: 30
 
   frontend-ci:
-    name: Frontend Build & Test (React/Vite)
+    name: Frontend Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -81,7 +82,8 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist/
-          retention-days: 7
+          if-no-files-found: warn
+          retention-days: 30
 
   security-scan:
     name: Security & Vulnerability Scan
@@ -104,7 +106,7 @@ jobs:
   deploy:
     name: Deployment
     needs: [backend-ci, frontend-ci, security-scan]
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main-secondary') && github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -114,7 +116,7 @@ jobs:
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend-jar
+          name: application-jar
           path: backend/target
 
       - name: Download Frontend Artifact
@@ -127,4 +129,5 @@ jobs:
         env:
           TARGET_BRANCH: ${{ github.ref_name }}
         run: |
-          echo "Deploying application artifacts for target branch: $TARGET_BRANCH"
+          echo "Deploying application from branch: $TARGET_BRANCH"
+          # Add deployment logic here
