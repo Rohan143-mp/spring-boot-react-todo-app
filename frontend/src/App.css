@@ -48,6 +48,28 @@ h1 {
   background: #4338ca;
 }
 
+.todo-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.todo-filters button {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  color: #555;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.todo-filters button.selected {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
 .todo-list {
   list-style: none;
   padding: 0;

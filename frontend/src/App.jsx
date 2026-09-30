@@ -5,8 +5,15 @@ import './App.css'
 function App() {
   const [todos, setTodos] = useState([])
   const [title, setTitle] = useState('')
+  const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  const visibleTodos = todos.filter((todo) => {
+    if (filter === 'active') return !todo.completed
+    if (filter === 'completed') return todo.completed
+    return true
+  })
 
   const loadTodos = async () => {
     try {
@@ -61,8 +68,24 @@ function App() {
       {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
 
+      {!loading && !error && todos.length > 0 && (
+        <div className="todo-filters" aria-label="Filter todos">
+          {['all', 'active', 'completed'].map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={filter === option ? 'selected' : ''}
+              aria-pressed={filter === option}
+              onClick={() => setFilter(option)}
+            >
+              {option[0].toUpperCase() + option.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
+
       <ul className="todo-list">
-        {todos.map((todo) => (
+        {visibleTodos.map((todo) => (
           <li key={todo.id} className={todo.completed ? 'completed' : ''}>
             <label>
               <input
@@ -80,6 +103,9 @@ function App() {
       </ul>
 
       {!loading && !error && todos.length === 0 && <p>No todos yet. Add one above!</p>}
+      {!loading && !error && todos.length > 0 && visibleTodos.length === 0 && (
+        <p>No {filter} todos.</p>
+      )}
     </div>
   )
 }
